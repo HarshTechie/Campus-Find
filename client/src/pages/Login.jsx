@@ -94,11 +94,7 @@ export default function Login({ onLogin }) {
       // Reset Google's cached selection so the user can pick a different
       // account next time without an extra click.
       try { window.google?.accounts?.id?.disableAutoSelect?.() } catch {}
-      if (err && err.status === 403) {
-        setError(err.message || 'Sign-in is restricted to @chitkara.edu.in accounts.')
-      } else {
-        setError(err?.message || 'Sign-in failed. Please try again.')
-      }
+      setError(err?.message || 'Sign-in failed. Please try again.')
     }
   },
 
@@ -169,7 +165,7 @@ export default function Login({ onLogin }) {
         </div>
 
         <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-tracked text-ink-3">
-          Students only · @chitkara.edu.in
+          Sign in with any Google account
         </p>
       </div>
     </div>

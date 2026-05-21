@@ -4,9 +4,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { verifyIdToken } = require('../services/googleVerify');
 
-// Single source of truth for the allowed sign-in domain.
-// Override per-environment with ALLOWED_EMAIL_DOMAIN in .env if needed.
-const ALLOWED_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || 'chitkara.edu.in').toLowerCase();
+// Optional domain restriction. Set ALLOWED_EMAIL_DOMAIN in env to lock sign-in
+// to a specific domain (e.g. "chitkara.edu.in"). Leave unset/empty to allow
+// any Google account.
+const ALLOWED_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || '').toLowerCase();
 
 router.post('/signin', async (req, res) => {
   const { idToken } = req.body;
@@ -19,10 +20,8 @@ router.post('/signin', async (req, res) => {
     return res.status(400).json({ message: 'Invalid email from Google' });
   }
 
-  // Domain-level authorization. Runs AFTER token verification (so we know
-  // Google itself signed off on this email) and BEFORE any DB write (so a
-  // rejected sign-in never persists a User row).
-  if (!email.endsWith('@' + ALLOWED_DOMAIN)) {
+  // Only apply the domain check if ALLOWED_DOMAIN is set. Empty = allow all.
+  if (ALLOWED_DOMAIN && !email.endsWith('@' + ALLOWED_DOMAIN)) {
     return res.status(403).json({
       message: `Sign-in is restricted to @${ALLOWED_DOMAIN} accounts.`,
       code: 'DOMAIN_NOT_ALLOWED',
